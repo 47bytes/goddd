@@ -4,9 +4,7 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/metrics"
-
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd"
 )
 
 type instrumentingService struct {
@@ -24,7 +22,7 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.TimeHistog
 	}
 }
 
-func (s *instrumentingService) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
+func (s *instrumentingService) BookNewCargo(origin, destination goddd.UNLocode, arrivalDeadline time.Time) (goddd.TrackingID, error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "book"}
 		s.requestCount.With(methodField).Add(1)
@@ -34,7 +32,7 @@ func (s *instrumentingService) BookNewCargo(origin, destination location.UNLocod
 	return s.Service.BookNewCargo(origin, destination, arrivalDeadline)
 }
 
-func (s *instrumentingService) LoadCargo(id cargo.TrackingID) (c Cargo, err error) {
+func (s *instrumentingService) LoadCargo(id goddd.TrackingID) (c Cargo, err error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "load"}
 		s.requestCount.With(methodField).Add(1)
@@ -44,7 +42,7 @@ func (s *instrumentingService) LoadCargo(id cargo.TrackingID) (c Cargo, err erro
 	return s.Service.LoadCargo(id)
 }
 
-func (s *instrumentingService) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
+func (s *instrumentingService) RequestPossibleRoutesForCargo(id goddd.TrackingID) []goddd.Itinerary {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "request_routes"}
 		s.requestCount.With(methodField).Add(1)
@@ -54,7 +52,7 @@ func (s *instrumentingService) RequestPossibleRoutesForCargo(id cargo.TrackingID
 	return s.Service.RequestPossibleRoutesForCargo(id)
 }
 
-func (s *instrumentingService) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) (err error) {
+func (s *instrumentingService) AssignCargoToRoute(id goddd.TrackingID, itinerary goddd.Itinerary) (err error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "assign_to_route"}
 		s.requestCount.With(methodField).Add(1)
@@ -64,7 +62,7 @@ func (s *instrumentingService) AssignCargoToRoute(id cargo.TrackingID, itinerary
 	return s.Service.AssignCargoToRoute(id, itinerary)
 }
 
-func (s *instrumentingService) ChangeDestination(id cargo.TrackingID, l location.UNLocode) (err error) {
+func (s *instrumentingService) ChangeDestination(id goddd.TrackingID, l goddd.UNLocode) (err error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "change_destination"}
 		s.requestCount.With(methodField).Add(1)

@@ -1,4 +1,4 @@
-package location
+package goddd
 
 // Sample UN locodes.
 var (

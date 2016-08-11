@@ -19,16 +19,14 @@ import (
 	"github.com/go-kit/kit/metrics"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
+	"github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
-	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/inspection"
-	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 const (
@@ -63,10 +61,10 @@ func main() {
 
 	// Setup repositories
 	var (
-		cargos         cargo.Repository
-		locations      location.Repository
-		voyages        voyage.Repository
-		handlingEvents cargo.HandlingEventRepository
+		cargos         goddd.CargoRepository
+		locations      goddd.LocationRepository
+		voyages        goddd.VoyageRepository
+		handlingEvents goddd.HandlingEventRepository
 	)
 
 	if *inmemory {
@@ -91,7 +89,7 @@ func main() {
 
 	// Configure some questionable dependencies.
 	var (
-		handlingEventFactory = cargo.HandlingEventFactory{
+		handlingEventFactory = goddd.HandlingEventFactory{
 			CargoRepository:    cargos,
 			VoyageRepository:   voyages,
 			LocationRepository: locations,
@@ -207,19 +205,19 @@ func envString(env, fallback string) string {
 	return e
 }
 
-func storeTestData(r cargo.Repository) {
-	test1 := cargo.New("FTL456", cargo.RouteSpecification{
-		Origin:          location.AUMEL,
-		Destination:     location.SESTO,
+func storeTestData(r goddd.CargoRepository) {
+	test1 := goddd.NewCargo("FTL456", goddd.RouteSpecification{
+		Origin:          goddd.AUMEL,
+		Destination:     goddd.SESTO,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 7),
 	})
 	if err := r.Store(test1); err != nil {
 		panic(err)
 	}
 
-	test2 := cargo.New("ABC123", cargo.RouteSpecification{
-		Origin:          location.SESTO,
-		Destination:     location.CNHKG,
+	test2 := goddd.NewCargo("ABC123", goddd.RouteSpecification{
+		Origin:          goddd.SESTO,
+		Destination:     goddd.CNHKG,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 14),
 	})
 	if err := r.Store(test2); err != nil {

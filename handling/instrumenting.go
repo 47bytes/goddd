@@ -5,9 +5,7 @@ import (
 
 	"github.com/go-kit/kit/metrics"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	"github.com/marcusolsson/goddd"
 )
 
 type instrumentingService struct {
@@ -25,8 +23,8 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.TimeHistog
 	}
 }
 
-func (s *instrumentingService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyage voyage.Number,
-	loc location.UNLocode, eventType cargo.HandlingEventType) error {
+func (s *instrumentingService) RegisterHandlingEvent(completionTime time.Time, trackingID goddd.TrackingID, voyage goddd.VoyageNumber,
+	loc goddd.UNLocode, eventType goddd.HandlingEventType) error {
 
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "register_incident"}

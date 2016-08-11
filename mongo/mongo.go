@@ -1,11 +1,10 @@
 package mongo
 
 import (
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
+	"github.com/marcusolsson/goddd"
 )
 
 type cargoRepository struct {
@@ -13,7 +12,7 @@ type cargoRepository struct {
 	session *mgo.Session
 }
 
-func (r *cargoRepository) Store(cargo *cargo.Cargo) error {
+func (r *cargoRepository) Store(cargo *goddd.Cargo) error {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -24,16 +23,16 @@ func (r *cargoRepository) Store(cargo *cargo.Cargo) error {
 	return err
 }
 
-func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *cargoRepository) Find(trackingID goddd.TrackingID) (*goddd.Cargo, error) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
 
-	var result cargo.Cargo
+	var result goddd.Cargo
 	if err := c.Find(bson.M{"trackingid": trackingID}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			return nil, cargo.ErrUnknown
+			return nil, goddd.ErrUnknownCargo
 		}
 		return nil, err
 	}
@@ -41,22 +40,22 @@ func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error
 	return &result, nil
 }
 
-func (r *cargoRepository) FindAll() []*cargo.Cargo {
+func (r *cargoRepository) FindAll() []*goddd.Cargo {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
 
-	var result []*cargo.Cargo
+	var result []*goddd.Cargo
 	if err := c.Find(bson.M{}).All(&result); err != nil {
-		return []*cargo.Cargo{}
+		return []*goddd.Cargo{}
 	}
 
 	return result
 }
 
 // NewCargoRepository returns a new instance of a MongoDB cargo repository.
-func NewCargoRepository(db string, session *mgo.Session) (cargo.Repository, error) {
+func NewCargoRepository(db string, session *mgo.Session) (goddd.CargoRepository, error) {
 	r := &cargoRepository{
 		db:      db,
 		session: session,
@@ -87,38 +86,38 @@ type locationRepository struct {
 	session *mgo.Session
 }
 
-func (r *locationRepository) Find(locode location.UNLocode) (location.Location, error) {
+func (r *locationRepository) Find(locode goddd.UNLocode) (goddd.Location, error) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
 
-	var result location.Location
+	var result goddd.Location
 	if err := c.Find(bson.M{"unlocode": locode}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			return location.Location{}, location.ErrUnknown
+			return goddd.Location{}, goddd.ErrUnknownLocation
 		}
-		return location.Location{}, err
+		return goddd.Location{}, err
 	}
 
 	return result, nil
 }
 
-func (r *locationRepository) FindAll() []location.Location {
+func (r *locationRepository) FindAll() []goddd.Location {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
 
-	var result []location.Location
+	var result []goddd.Location
 	if err := c.Find(bson.M{}).All(&result); err != nil {
-		return []location.Location{}
+		return []goddd.Location{}
 	}
 
 	return result
 }
 
-func (r *locationRepository) store(l location.Location) error {
+func (r *locationRepository) store(l goddd.Location) error {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -130,7 +129,7 @@ func (r *locationRepository) store(l location.Location) error {
 }
 
 // NewLocationRepository returns a new instance of a MongoDB location repository.
-func NewLocationRepository(db string, session *mgo.Session) (location.Repository, error) {
+func NewLocationRepository(db string, session *mgo.Session) (goddd.LocationRepository, error) {
 	r := &locationRepository{
 		db:      db,
 		session: session,
@@ -153,13 +152,13 @@ func NewLocationRepository(db string, session *mgo.Session) (location.Repository
 		return nil, err
 	}
 
-	initial := []location.Location{
-		location.Stockholm,
-		location.Melbourne,
-		location.Hongkong,
-		location.Tokyo,
-		location.Rotterdam,
-		location.Hamburg,
+	initial := []goddd.Location{
+		goddd.Stockholm,
+		goddd.Melbourne,
+		goddd.Hongkong,
+		goddd.Tokyo,
+		goddd.Rotterdam,
+		goddd.Hamburg,
 	}
 
 	for _, l := range initial {
@@ -174,16 +173,16 @@ type voyageRepository struct {
 	session *mgo.Session
 }
 
-func (r *voyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, error) {
+func (r *voyageRepository) Find(voyageNumber goddd.VoyageNumber) (*goddd.Voyage, error) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("voyage")
 
-	var result voyage.Voyage
+	var result goddd.Voyage
 	if err := c.Find(bson.M{"number": voyageNumber}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			return nil, voyage.ErrUnknown
+			return nil, goddd.ErrUnknownVoyage
 		}
 		return nil, err
 	}
@@ -191,7 +190,7 @@ func (r *voyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, err
 	return &result, nil
 }
 
-func (r *voyageRepository) store(v *voyage.Voyage) error {
+func (r *voyageRepository) store(v *goddd.Voyage) error {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -203,7 +202,7 @@ func (r *voyageRepository) store(v *voyage.Voyage) error {
 }
 
 // NewVoyageRepository returns a new instance of a MongoDB voyage repository.
-func NewVoyageRepository(db string, session *mgo.Session) (voyage.Repository, error) {
+func NewVoyageRepository(db string, session *mgo.Session) (goddd.VoyageRepository, error) {
 	r := &voyageRepository{
 		db:      db,
 		session: session,
@@ -226,15 +225,15 @@ func NewVoyageRepository(db string, session *mgo.Session) (voyage.Repository, er
 		return nil, err
 	}
 
-	initial := []*voyage.Voyage{
-		voyage.V100,
-		voyage.V300,
-		voyage.V400,
-		voyage.V0100S,
-		voyage.V0200T,
-		voyage.V0300A,
-		voyage.V0301S,
-		voyage.V0400S,
+	initial := []*goddd.Voyage{
+		goddd.V100,
+		goddd.V300,
+		goddd.V400,
+		goddd.V0100S,
+		goddd.V0200T,
+		goddd.V0300A,
+		goddd.V0301S,
+		goddd.V0400S,
 	}
 
 	for _, v := range initial {
@@ -249,7 +248,7 @@ type handlingEventRepository struct {
 	session *mgo.Session
 }
 
-func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
+func (r *handlingEventRepository) Store(e goddd.HandlingEvent) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -258,20 +257,20 @@ func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 	_ = c.Insert(e)
 }
 
-func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+func (r *handlingEventRepository) QueryHandlingHistory(trackingID goddd.TrackingID) goddd.HandlingHistory {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("handling_event")
 
-	var result []cargo.HandlingEvent
+	var result []goddd.HandlingEvent
 	_ = c.Find(bson.M{"trackingid": trackingID}).All(&result)
 
-	return cargo.HandlingHistory{HandlingEvents: result}
+	return goddd.HandlingHistory{HandlingEvents: result}
 }
 
 // NewHandlingEventRepository returns a new instance of a MongoDB handling event repository.
-func NewHandlingEventRepository(db string, session *mgo.Session) cargo.HandlingEventRepository {
+func NewHandlingEventRepository(db string, session *mgo.Session) goddd.HandlingEventRepository {
 	return &handlingEventRepository{
 		db:      db,
 		session: session,

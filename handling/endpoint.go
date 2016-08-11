@@ -4,18 +4,15 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
+	"github.com/marcusolsson/goddd"
 	"golang.org/x/net/context"
-
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 type registerIncidentRequest struct {
-	ID             cargo.TrackingID
-	Location       location.UNLocode
-	Voyage         voyage.Number
-	EventType      cargo.HandlingEventType
+	ID             goddd.TrackingID
+	Location       goddd.UNLocode
+	Voyage         goddd.VoyageNumber
+	EventType      goddd.HandlingEventType
 	CompletionTime time.Time
 }
 

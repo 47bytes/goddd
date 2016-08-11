@@ -9,10 +9,8 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/marcusolsson/goddd"
 	"golang.org/x/net/context"
-
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
 )
 
 // MakeHandler returns a handler for the booking service.
@@ -100,8 +98,8 @@ func decodeBookCargoRequest(_ context.Context, r *http.Request) (interface{}, er
 	}
 
 	return bookCargoRequest{
-		Origin:          location.UNLocode(body.Origin),
-		Destination:     location.UNLocode(body.Destination),
+		Origin:          goddd.UNLocode(body.Origin),
+		Destination:     goddd.UNLocode(body.Destination),
 		ArrivalDeadline: body.ArrivalDeadline,
 	}, nil
 }
@@ -112,7 +110,7 @@ func decodeLoadCargoRequest(_ context.Context, r *http.Request) (interface{}, er
 	if !ok {
 		return nil, errBadRoute
 	}
-	return loadCargoRequest{ID: cargo.TrackingID(id)}, nil
+	return loadCargoRequest{ID: goddd.TrackingID(id)}, nil
 }
 
 func decodeRequestRoutesRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -121,7 +119,7 @@ func decodeRequestRoutesRequest(_ context.Context, r *http.Request) (interface{}
 	if !ok {
 		return nil, errBadRoute
 	}
-	return requestRoutesRequest{ID: cargo.TrackingID(id)}, nil
+	return requestRoutesRequest{ID: goddd.TrackingID(id)}, nil
 }
 
 func decodeAssignToRouteRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -131,13 +129,13 @@ func decodeAssignToRouteRequest(_ context.Context, r *http.Request) (interface{}
 		return nil, errBadRoute
 	}
 
-	var itinerary cargo.Itinerary
+	var itinerary goddd.Itinerary
 	if err := json.NewDecoder(r.Body).Decode(&itinerary); err != nil {
 		return nil, err
 	}
 
 	return assignToRouteRequest{
-		ID:        cargo.TrackingID(id),
+		ID:        goddd.TrackingID(id),
 		Itinerary: itinerary,
 	}, nil
 }
@@ -158,8 +156,8 @@ func decodeChangeDestinationRequest(_ context.Context, r *http.Request) (interfa
 	}
 
 	return changeDestinationRequest{
-		ID:          cargo.TrackingID(id),
-		Destination: location.UNLocode(body.Destination),
+		ID:          goddd.TrackingID(id),
+		Destination: goddd.UNLocode(body.Destination),
 	}, nil
 }
 
@@ -187,7 +185,7 @@ type errorer interface {
 // encode errors from business-logic
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
-	case cargo.ErrUnknown:
+	case goddd.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)

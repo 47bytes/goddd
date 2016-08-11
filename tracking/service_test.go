@@ -3,23 +3,22 @@ package tracking
 import (
 	"testing"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/mock"
 )
 
 func TestTrack(t *testing.T) {
 	var cargos mock.CargoRepository
-	cargos.FindFn = func(id cargo.TrackingID) (*cargo.Cargo, error) {
-		return cargo.New("FTL456", cargo.RouteSpecification{
-			Origin:      location.AUMEL,
-			Destination: location.SESTO,
+	cargos.FindFn = func(id goddd.TrackingID) (*goddd.Cargo, error) {
+		return goddd.NewCargo("FTL456", goddd.RouteSpecification{
+			Origin:      goddd.AUMEL,
+			Destination: goddd.SESTO,
 		}), nil
 	}
 
 	var events mock.HandlingEventRepository
-	events.QueryHandlingHistoryFn = func(id cargo.TrackingID) cargo.HandlingHistory {
-		return cargo.HandlingHistory{}
+	events.QueryHandlingHistoryFn = func(id goddd.TrackingID) goddd.HandlingHistory {
+		return goddd.HandlingHistory{}
 	}
 
 	s := NewService(&cargos, &events)
@@ -38,7 +37,7 @@ func TestTrack(t *testing.T) {
 	if c.Destination != "SESTO" {
 		t.Errorf("c.Destination = %v; want = %v", c.Destination, "SESTO")
 	}
-	if c.StatusText != cargo.NotReceived.String() {
-		t.Errorf("c.StatusText = %v; want = %v", c.StatusText, cargo.NotReceived.String())
+	if c.StatusText != goddd.NotReceived.String() {
+		t.Errorf("c.StatusText = %v; want = %v", c.StatusText, goddd.NotReceived.String())
 	}
 }

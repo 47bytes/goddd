@@ -10,9 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	"github.com/marcusolsson/goddd"
 )
 
 // MakeHandler returns a handler for the handling service.
@@ -53,20 +51,20 @@ func decodeRegisterIncidentRequest(_ context.Context, r *http.Request) (interfac
 
 	return registerIncidentRequest{
 		CompletionTime: body.CompletionTime,
-		ID:             cargo.TrackingID(body.TrackingID),
-		Voyage:         voyage.Number(body.VoyageNumber),
-		Location:       location.UNLocode(body.Location),
+		ID:             goddd.TrackingID(body.TrackingID),
+		Voyage:         goddd.VoyageNumber(body.VoyageNumber),
+		Location:       goddd.UNLocode(body.Location),
 		EventType:      stringToEventType(body.EventType),
 	}, nil
 }
 
-func stringToEventType(s string) cargo.HandlingEventType {
-	types := map[string]cargo.HandlingEventType{
-		cargo.Receive.String(): cargo.Receive,
-		cargo.Load.String():    cargo.Load,
-		cargo.Unload.String():  cargo.Unload,
-		cargo.Customs.String(): cargo.Customs,
-		cargo.Claim.String():   cargo.Claim,
+func stringToEventType(s string) goddd.HandlingEventType {
+	types := map[string]goddd.HandlingEventType{
+		goddd.Receive.String(): goddd.Receive,
+		goddd.Load.String():    goddd.Load,
+		goddd.Unload.String():  goddd.Unload,
+		goddd.Customs.String(): goddd.Customs,
+		goddd.Claim.String():   goddd.Claim,
 	}
 	return types[s]
 }
@@ -87,7 +85,7 @@ type errorer interface {
 // encode errors from business-logic
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
-	case cargo.ErrUnknown:
+	case goddd.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)

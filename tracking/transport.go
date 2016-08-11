@@ -8,9 +8,8 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/marcusolsson/goddd"
 	"golang.org/x/net/context"
-
-	"github.com/marcusolsson/goddd/cargo"
 )
 
 // MakeHandler returns a handler for the tracking service.
@@ -61,7 +60,7 @@ type errorer interface {
 // encode errors from business-logic
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
-	case cargo.ErrUnknown:
+	case goddd.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)

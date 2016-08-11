@@ -12,7 +12,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"golang.org/x/net/context"
 
-	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/mock"
 )
 
@@ -20,13 +20,13 @@ func TestTrackCargo(t *testing.T) {
 	var cargos mockCargoRepository
 
 	var events mock.HandlingEventRepository
-	events.QueryHandlingHistoryFn = func(cargo.TrackingID) cargo.HandlingHistory {
-		return cargo.HandlingHistory{}
+	events.QueryHandlingHistoryFn = func(goddd.TrackingID) goddd.HandlingHistory {
+		return goddd.HandlingHistory{}
 	}
 
 	s := NewService(&cargos, &events)
 
-	c := cargo.New("TEST", cargo.RouteSpecification{
+	c := goddd.NewCargo("TEST", goddd.RouteSpecification{
 		Origin:          "SESTO",
 		Destination:     "FIHEL",
 		ArrivalDeadline: time.Date(2005, 12, 4, 0, 0, 0, 0, time.UTC),
@@ -84,8 +84,8 @@ func TestTrackUnknownCargo(t *testing.T) {
 	var cargos mockCargoRepository
 
 	var events mock.HandlingEventRepository
-	events.QueryHandlingHistoryFn = func(cargo.TrackingID) cargo.HandlingHistory {
-		return cargo.HandlingHistory{}
+	events.QueryHandlingHistoryFn = func(goddd.TrackingID) goddd.HandlingHistory {
+		return goddd.HandlingHistory{}
 	}
 
 	s := NewService(&cargos, &events)
@@ -125,21 +125,21 @@ func TestTrackUnknownCargo(t *testing.T) {
 }
 
 type mockCargoRepository struct {
-	cargo *cargo.Cargo
+	cargo *goddd.Cargo
 }
 
-func (r *mockCargoRepository) Store(c *cargo.Cargo) error {
+func (r *mockCargoRepository) Store(c *goddd.Cargo) error {
 	r.cargo = c
 	return nil
 }
 
-func (r *mockCargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *mockCargoRepository) Find(id goddd.TrackingID) (*goddd.Cargo, error) {
 	if r.cargo != nil {
 		return r.cargo, nil
 	}
-	return nil, cargo.ErrUnknown
+	return nil, goddd.ErrUnknownCargo
 }
 
-func (r *mockCargoRepository) FindAll() []*cargo.Cargo {
-	return []*cargo.Cargo{r.cargo}
+func (r *mockCargoRepository) FindAll() []*goddd.Cargo {
+	return []*goddd.Cargo{r.cargo}
 }

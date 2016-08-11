@@ -1,39 +1,35 @@
 // Package inmem provides in-memory implementations of all the domain repositories.
 package inmem
 
-import (
-	"sync"
+import "github.com/marcusolsson/goddd"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
-)
+import "sync"
 
 type cargoRepository struct {
 	mtx    sync.RWMutex
-	cargos map[cargo.TrackingID]*cargo.Cargo
+	cargos map[goddd.TrackingID]*goddd.Cargo
 }
 
-func (r *cargoRepository) Store(c *cargo.Cargo) error {
+func (r *cargoRepository) Store(c *goddd.Cargo) error {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	r.cargos[c.TrackingID] = c
 	return nil
 }
 
-func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *cargoRepository) Find(trackingID goddd.TrackingID) (*goddd.Cargo, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	if val, ok := r.cargos[trackingID]; ok {
 		return val, nil
 	}
-	return nil, cargo.ErrUnknown
+	return nil, goddd.ErrUnknownCargo
 }
 
-func (r *cargoRepository) FindAll() []*cargo.Cargo {
+func (r *cargoRepository) FindAll() []*goddd.Cargo {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	c := make([]*cargo.Cargo, 0, len(r.cargos))
+	c := make([]*goddd.Cargo, 0, len(r.cargos))
 	for _, val := range r.cargos {
 		c = append(c, val)
 	}
@@ -41,25 +37,25 @@ func (r *cargoRepository) FindAll() []*cargo.Cargo {
 }
 
 // NewCargoRepository returns a new instance of a in-memory cargo repository.
-func NewCargoRepository() cargo.Repository {
+func NewCargoRepository() goddd.CargoRepository {
 	return &cargoRepository{
-		cargos: make(map[cargo.TrackingID]*cargo.Cargo),
+		cargos: make(map[goddd.TrackingID]*goddd.Cargo),
 	}
 }
 
 type locationRepository struct {
-	locations map[location.UNLocode]location.Location
+	locations map[goddd.UNLocode]goddd.Location
 }
 
-func (r *locationRepository) Find(locode location.UNLocode) (location.Location, error) {
+func (r *locationRepository) Find(locode goddd.UNLocode) (goddd.Location, error) {
 	if l, ok := r.locations[locode]; ok {
 		return l, nil
 	}
-	return location.Location{}, location.ErrUnknown
+	return goddd.Location{}, goddd.ErrUnknownLocation
 }
 
-func (r *locationRepository) FindAll() []location.Location {
-	l := make([]location.Location, 0, len(r.locations))
+func (r *locationRepository) FindAll() []goddd.Location {
+	l := make([]goddd.Location, 0, len(r.locations))
 	for _, val := range r.locations {
 		l = append(l, val)
 	}
@@ -67,76 +63,76 @@ func (r *locationRepository) FindAll() []location.Location {
 }
 
 // NewLocationRepository returns a new instance of a in-memory location repository.
-func NewLocationRepository() location.Repository {
+func NewLocationRepository() goddd.LocationRepository {
 	r := &locationRepository{
-		locations: make(map[location.UNLocode]location.Location),
+		locations: make(map[goddd.UNLocode]goddd.Location),
 	}
 
-	r.locations[location.SESTO] = location.Stockholm
-	r.locations[location.AUMEL] = location.Melbourne
-	r.locations[location.CNHKG] = location.Hongkong
-	r.locations[location.JNTKO] = location.Tokyo
-	r.locations[location.NLRTM] = location.Rotterdam
-	r.locations[location.DEHAM] = location.Hamburg
+	r.locations[goddd.SESTO] = goddd.Stockholm
+	r.locations[goddd.AUMEL] = goddd.Melbourne
+	r.locations[goddd.CNHKG] = goddd.Hongkong
+	r.locations[goddd.JNTKO] = goddd.Tokyo
+	r.locations[goddd.NLRTM] = goddd.Rotterdam
+	r.locations[goddd.DEHAM] = goddd.Hamburg
 
 	return r
 }
 
 type voyageRepository struct {
-	voyages map[voyage.Number]*voyage.Voyage
+	voyages map[goddd.VoyageNumber]*goddd.Voyage
 }
 
-func (r *voyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, error) {
+func (r *voyageRepository) Find(voyageNumber goddd.VoyageNumber) (*goddd.Voyage, error) {
 	if v, ok := r.voyages[voyageNumber]; ok {
 		return v, nil
 	}
 
-	return nil, voyage.ErrUnknown
+	return nil, goddd.ErrUnknownVoyage
 }
 
 // NewVoyageRepository returns a new instance of a in-memory voyage repository.
-func NewVoyageRepository() voyage.Repository {
+func NewVoyageRepository() goddd.VoyageRepository {
 	r := &voyageRepository{
-		voyages: make(map[voyage.Number]*voyage.Voyage),
+		voyages: make(map[goddd.VoyageNumber]*goddd.Voyage),
 	}
 
-	r.voyages[voyage.V100.Number] = voyage.V100
-	r.voyages[voyage.V300.Number] = voyage.V300
-	r.voyages[voyage.V400.Number] = voyage.V400
+	r.voyages[goddd.V100.Number] = goddd.V100
+	r.voyages[goddd.V300.Number] = goddd.V300
+	r.voyages[goddd.V400.Number] = goddd.V400
 
-	r.voyages[voyage.V0100S.Number] = voyage.V0100S
-	r.voyages[voyage.V0200T.Number] = voyage.V0200T
-	r.voyages[voyage.V0300A.Number] = voyage.V0300A
-	r.voyages[voyage.V0301S.Number] = voyage.V0301S
-	r.voyages[voyage.V0400S.Number] = voyage.V0400S
+	r.voyages[goddd.V0100S.Number] = goddd.V0100S
+	r.voyages[goddd.V0200T.Number] = goddd.V0200T
+	r.voyages[goddd.V0300A.Number] = goddd.V0300A
+	r.voyages[goddd.V0301S.Number] = goddd.V0301S
+	r.voyages[goddd.V0400S.Number] = goddd.V0400S
 
 	return r
 }
 
 type handlingEventRepository struct {
 	mtx    sync.RWMutex
-	events map[cargo.TrackingID][]cargo.HandlingEvent
+	events map[goddd.TrackingID][]goddd.HandlingEvent
 }
 
-func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
+func (r *handlingEventRepository) Store(e goddd.HandlingEvent) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	// Make array if it's the first event with this tracking ID.
 	if _, ok := r.events[e.TrackingID]; !ok {
-		r.events[e.TrackingID] = make([]cargo.HandlingEvent, 0)
+		r.events[e.TrackingID] = make([]goddd.HandlingEvent, 0)
 	}
 	r.events[e.TrackingID] = append(r.events[e.TrackingID], e)
 }
 
-func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+func (r *handlingEventRepository) QueryHandlingHistory(trackingID goddd.TrackingID) goddd.HandlingHistory {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	return cargo.HandlingHistory{HandlingEvents: r.events[trackingID]}
+	return goddd.HandlingHistory{HandlingEvents: r.events[trackingID]}
 }
 
 // NewHandlingEventRepository returns a new instance of a in-memory handling event repository.
-func NewHandlingEventRepository() cargo.HandlingEventRepository {
+func NewHandlingEventRepository() goddd.HandlingEventRepository {
 	return &handlingEventRepository{
-		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
+		events: make(map[goddd.TrackingID][]goddd.HandlingEvent),
 	}
 }
